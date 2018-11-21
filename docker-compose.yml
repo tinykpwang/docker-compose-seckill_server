@@ -1,0 +1,50 @@
+version: '2'
+
+services:
+
+  ### GRPC container #########################################
+
+  grpctiny:
+      build: ./GRPC
+      ports:
+        - "50051:50051"
+      depends_on:
+        - mysql
+        - redis
+      links:
+        - mysql:mymysql
+        - redis:myredis
+      restart: always
+      networks:
+        - default
+
+  ### Mysql container #########################################
+
+  mysql:
+      build: ./mysql
+      ports:
+        - "3306:3306"
+      volumes:
+        - ./components/mysql/data:/var/lib/mysql
+        - ./components/mysql/config/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      environment: 
+        - MYSQL_DATABASE=seckill
+        - MYSQL_USER=tinykpwang
+        - MYSQL_PASSWORD=14225117sa
+        - MYSQL_ROOT_PASSWORD=14225117sa
+      restart: always
+      networks:
+        - default
+
+  ### Redis container #########################################
+
+  redis:
+      build: ./redis
+      ports:
+        - "6379:6379"
+      volumes:
+        - ./components/redis/config/redis.conf:/usr/local/etc/redis/redis.conf
+        - ./components/redis/log/redis.log:/var/log/redis/redis.log
+      restart: always
+      networks:
+        - default
