@@ -48,7 +48,6 @@ redisContext *GetRedisConnection(){
     //开启redis
     redisContext *redisconn = redisConnect("myredis", 6379);
     if (redisconn != NULL && redisconn->err) {
-        // printf("connection error: %s\n", redisconn->errstr);
         std::cout << "redis connection error:" << redisconn->errstr <<std::endl;
         redisFree(redisconn);
         exit(1);

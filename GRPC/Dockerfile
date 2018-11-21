@@ -16,6 +16,10 @@ RUN curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
 
 RUN apt-get -y update && apt-get install -y bazel
 
+RUN apt-get install -y libmysql++-dev
+
+RUN apt-get install -y mysql-client
+
 RUN apt-get install -y libmysqlcppconn-dev
 
 RUN apt-get install -y libhiredis-dev

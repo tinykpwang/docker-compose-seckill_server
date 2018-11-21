@@ -9,8 +9,6 @@
 > docker-compose up --build
 
 - 客户端启动方法(本地命令行客户端,需要安装grpc C++、bazel):
-> git clone https://github.com/tinykpwang/grpc
-> cd grpc
 > ulimit -n 2000
 > bazel build src:seckill_client
 > bazel-bin/src/seckill_client
