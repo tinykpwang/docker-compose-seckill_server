@@ -331,8 +331,6 @@ string MD5::ToString()
 {
     char output[33];
     for(int j = 0; j < 16; j++ )
-    {
         sprintf( output + j * 2, "%02x", ((unsigned char*)m_data)[j]);
-    }
     return string(output);
 }

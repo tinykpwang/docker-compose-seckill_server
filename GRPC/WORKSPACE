@@ -1,4 +1,8 @@
-# protobuf & grpc rules
+
+#--incompatible_remove_native_git_repository=False
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
 git_repository(
   name = "org_pubref_rules_protobuf",
   remote = "https://github.com/pubref/rules_protobuf",
@@ -8,34 +12,24 @@ git_repository(
 load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cpp_proto_repositories")
 cpp_proto_repositories()
 
-load("@org_pubref_rules_protobuf//python:rules.bzl", "py_proto_repositories")
-py_proto_repositories()
+#load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
 
-# docker rules
-git_repository(
-    name = "io_bazel_rules_docker",
-    remote = "https://github.com/bazelbuild/rules_docker.git",
-    tag = "v0.3.0",
-)
 
-load(
-    "@io_bazel_rules_docker//container:container.bzl",
-    "container_pull",
-    container_repositories = "repositories",
-)
 
-container_repositories()
+#load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cpp_proto_repositories")
+#cpp_proto_repositories()
 
-load(
-    "@io_bazel_rules_docker//cc:image.bzl",
-    _cc_image_repos = "repositories",
-)
+#load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-_cc_image_repos()
+#workspace(name = "com_github_googlecartographer_async_grpc")
 
-load(
-    "@io_bazel_rules_docker//python:image.bzl",
-    _py_image_repos = "repositories",
-)
+#load("//:bazel/repositories.bzl", "repositories")
 
-_py_image_repos()
+#repositories()
+
+#load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+#http_archive(
+#)
+
+

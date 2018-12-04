@@ -2,15 +2,11 @@
 #ifndef _MD5_H
 #define _MD5_H
 
-//#pragma warning(disable:4786)
 
 #include <string>
 
 using namespace std;
 
-/*!
- * Manage MD5.
- */
 class MD5
 {
 private:
@@ -30,31 +26,21 @@ private:
     void md5_finish( struct md5_context *ctx, uint8 digest[16] );
     
 public:
-    //! construct a MD5 from any buffer
     void GenerateMD5(unsigned char* buffer,int bufferlen);
     
-    //! construct a MD5
     MD5();
     
-    //! construct a md5src from char *
     MD5(const char * md5src);
     
-    //! construct a MD5 from a 16 bytes md5
     MD5(unsigned long* md5src);
     
-    //! add a other md5
     MD5 operator +(MD5 adder);
     
-    //! just if equal
     bool operator ==(MD5 cmper);
     
-    //! give the value from equer
-    // void operator =(MD5 equer);
-    
-    //! to a string
     string ToString();
     
     unsigned long m_data[4];
 };
-#endif /* md5.h */
+#endif
 

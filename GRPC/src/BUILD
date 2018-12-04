@@ -1,12 +1,22 @@
 package(default_visibility = ["//visibility:public"])
 
-# proto rules
-load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
-load("@org_pubref_rules_protobuf//python:rules.bzl", "py_proto_library")
+#licenses(["notice"])
 
-# docker image rules
-load("@io_bazel_rules_docker//cc:image.bzl", "cc_image")
-load("@io_bazel_rules_docker//python:image.bzl", "py_image")
+#load("@org_pubref_rules_protobuf", "cc_proto_library")
+# proto rules org_pubref_rules_protobuf
+#load("@bazel_tools//tools/build_defs/repo:git.bzl", "cc_proto_library")
+
+#load("@bazel_tools//tools/build_defs/repo:git.bzl", "cc_proto_library","cc_binary","cc_library")
+
+#load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
+
+#with_grpc = True,cc_proto_library
+
+#load("//tools/build_rules:grpc.bzl", "cc_grpc_library")
+
+#load("@org_pubref_rules_protobuf", "cc_proto_library")
+
+#load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
 
 cc_proto_library(
     name = "cc_seckill_proto",
@@ -18,10 +28,7 @@ cc_binary(
     name = "seckill_server",
     srcs = ["seckill_server.cc"],
     deps = [
-        ":cc_seckill_proto",
-        ":mysqlDriver",
-        ":hiredisDriver",
-        ":Md5Util"
+        ":Worker",
     ],
     copts = ["-Isrc/include"],
 )
@@ -42,12 +49,19 @@ cc_library(
 
 
 
-cc_image(
-    name = "seckill_server_image",
-    srcs = ["seckill_server.cc"],
+cc_library(
+    name = "Worker",
+    srcs = ["Worker.cc"],
+    hdrs = ["Worker.h"],
     deps = [
         ":cc_seckill_proto",
+        ":mysqlDriver",
+        ":hiredisDriver",
+        ":Md5Util",
+        ":mysqlpool",
+        ":redispool",
     ],
+    copts = ["-Isrc/include"],
 )
 
 cc_binary(
@@ -55,8 +69,28 @@ cc_binary(
     srcs = ["seckill_client.cc"],
     deps = [
         ":cc_seckill_proto",
-        ":Md5Util"
+        ":Md5Util",
+        ":mysqlpool",
     ],
+)
+cc_library(
+    name = "mysqlpool",
+    srcs = ["mysqlpool.cc"],
+    hdrs = ["mysqlpool.h"],
+    deps = [
+        ":mysqlDriver",
+    ],
+    copts = ["-Isrc/include"],
+)
+
+cc_library(
+    name = "redispool",
+    srcs = ["redispool.cc"],
+    hdrs = ["redispool.h"],
+    deps = [
+        ":hiredisDriver",
+    ],
+    copts = ["-Isrc/include"],
 )
 
 cc_library(
@@ -66,17 +100,6 @@ cc_library(
 )
 
 
-py_proto_library(
-    name = "py_seckill_proto",
-    protos = ["seckill.proto"],
-    with_grpc = True,
-)
 
-py_binary(
-    name = "py_seckill_client",
-    srcs = ["seckill_client.py"],
-    main = "seckill_client.py",
-    deps = [
-        ":py_seckill_proto"
-    ]
-)
+
+
