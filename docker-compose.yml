@@ -27,6 +27,7 @@ services:
       volumes:
         - ./components/mysql/data:/var/lib/mysql
         - ./components/mysql/config/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      privileged: true
       environment: 
         - MYSQL_DATABASE=seckill
         - MYSQL_USER=tinykpwang

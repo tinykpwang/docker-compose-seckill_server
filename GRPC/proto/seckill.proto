@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package seckill;
+
+message SeckillRequest {
+  string usrname = 1;
+  string usrkey = 2;
+}
+
+message SeckillResponse {
+  string result = 1;
+}
+
+service SeckillService {
+  rpc seckill(SeckillRequest) returns (SeckillResponse);
+}

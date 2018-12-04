@@ -10,7 +10,7 @@
 #include <grpc/grpc.h>
 #include <grpc/support/log.h>
 
-#include "src/seckill.grpc.pb.h"
+#include "proto/seckill.grpc.pb.h"
 
 #include <hiredis/hiredis.h>
 
@@ -18,7 +18,7 @@
 // #include "Utils.h"
 #include "mysqlpool.h"
 #include "redispool.h"
-#include <thread>
+// #include <thread>
 #include <unistd.h>
 #include <pthread.h>
 

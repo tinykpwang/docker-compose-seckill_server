@@ -1,14 +1,12 @@
 package(default_visibility = ["//visibility:public"])
 
-#licenses(["notice"])
-
 #load("@org_pubref_rules_protobuf", "cc_proto_library")
 # proto rules org_pubref_rules_protobuf
 #load("@bazel_tools//tools/build_defs/repo:git.bzl", "cc_proto_library")
 
 #load("@bazel_tools//tools/build_defs/repo:git.bzl", "cc_proto_library","cc_binary","cc_library")
 
-#load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
+
 
 #with_grpc = True,cc_proto_library
 
@@ -18,10 +16,29 @@ package(default_visibility = ["//visibility:public"])
 
 #load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
 
-cc_proto_library(
+#load("//bazel:grpc_build_system.bzl", "grpc_proto_library")
+
+
+
+#load("//cpp:cpp_grpc_library.bzl", "cpp_grpc_library")
+
+load("@build_stack_rules_proto//cpp:cpp_grpc_library.bzl", "cpp_grpc_library")
+
+#grpc_proto_library(
+#    name = "cc_seckill_proto",
+#    srcs = ["seckill.proto"],
+#)
+
+#cc_proto_library(
+#   name = "cc_seckill_proto",
+#   protos = [":seckill_proto"],
+#   with_grpc = True,
+#)
+
+
+cpp_grpc_library(
     name = "cc_seckill_proto",
-    protos = ["seckill.proto"],
-    with_grpc = True,
+    deps = ["//proto:seckill_proto"],
 )
 
 cc_binary(
@@ -71,6 +88,7 @@ cc_binary(
         ":cc_seckill_proto",
         ":Md5Util",
         ":mysqlpool",
+        "//:grpc++"
     ],
 )
 cc_library(

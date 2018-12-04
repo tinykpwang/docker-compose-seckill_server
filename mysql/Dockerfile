@@ -14,4 +14,4 @@ RUN  apt-get -o Acquire::Check-Valid-Until=false update && apt-get -y upgrade
 # Install Base Components
 RUN apt-get install -y --no-install-recommends cron vim curl
 
-RUN service mysql start
+#CMD service mysql start

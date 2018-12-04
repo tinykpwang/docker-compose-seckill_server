@@ -1,0 +1,10 @@
+
+proto_library(
+    name = "seckill_proto",
+    srcs = [
+        "seckill.proto",
+    ],
+    visibility = [
+        "//visibility:public",
+    ],
+)
