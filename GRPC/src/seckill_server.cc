@@ -13,7 +13,7 @@
 #define  SERVER_ADDRESS "0.0.0.0:50051"
 #define  MAX_RECEIVE_SIZE 5000
 #define  MAX_SEND_SIZE 5000
-#define  WORKER_NUM 10
+#define  WORKER_NUM 20
 
 #define  MYSQL_ADDRESS "mymysql"
 #define  MYSQL_USRNAME "tinykpwang"
@@ -68,39 +68,23 @@ class ServerImpl final
         int failedCounter = 0;
         pthread_rwlock_t rwlock;
         pthread_rwlock_init(&rwlock, NULL);
-
-        // failedCounter_ = 0;
-        // pthread_rwlock_init(&rwlock_, NULL);
-        // mysql_ = mysql;
-        // redis_ = redis;
         
         new Worker(&service_, cq_.get(), mysql,redis,&failedCounter,&rwlock);
         //开启多线程处理rpc调用请求
-        pthread_t tids[10];
-        for ( int i = 0 ; i < 10; i++ )
+        pthread_t tids[WORKER_NUM];
+        for ( int i = 0 ; i < WORKER_NUM; i++ )
         {
           int ret = pthread_create(&tids[i], NULL, ServerImpl::ThreadHandlerRPC, (void*)this);
           if (ret != 0)
               std::cout << "pthread_create error: error_code=" << ret << std::endl;
-
-        //     _beginthreadex(NULL,
-        //         0,
-        //         ServerImpl::ThreadHandlerRPC,
-        //         (void*)this,
-        //         0,
-        //         0);
         }
         //等各个线程退出后，进程才结束
-        // pthread_exit(NULL);
 
-        for ( int i = 0 ; i < 10; i++ )
+        for ( int i = 0 ; i < WORKER_NUM; i++ )
         {
             pthread_join(tids[0],NULL);
           
         }
-        
-
-        // HandleRPCS();
     }
     
     static void* ThreadHandlerRPC(void* lparam) 
@@ -112,7 +96,6 @@ class ServerImpl final
 
     void HandleRPCS() 
     {
-        // new Worker(&service_, cq_.get(), mysql_,redis_,&failedCounter_,&rwlock_);
         void* tag; 
         bool ok;
         while (true) 
@@ -120,43 +103,17 @@ class ServerImpl final
             GPR_ASSERT(cq_->Next(&tag, &ok));
             GPR_ASSERT(ok);
             static_cast<Worker*>(tag)->Proceed();
-
-            // if (cq_->Next(&tag, &ok))
-            // {
-            //     if (ok)
-            //     {
-            //         static_cast<Worker*>(tag)->Proceed();
-            //     }
-            // }
         }
     }
-
-    // static void*  ThreadHandlerRPC(void* lparam) {
-    //     ServerImpl* impl = (ServerImpl*)lparam;
-    //     impl->HandleRPCS();
-    //     return ((void *)0);
-    // }
 
     std::unique_ptr<ServerCompletionQueue> cq_;
     SeckillService::AsyncService service_;
     std::unique_ptr<Server> server_;
-
-
-    // int failedCounter_;
-    // pthread_rwlock_t rwlock_;
-    // MysqlPool *mysql_;
-    // RedisPool *redis_;
 };
 
 void prepareForSeckill(MysqlPool *mymysql,RedisPool *redis){
     MYSQL *connection = mymysql->getOneConnect();
     redisContext *redisconn = redis->getOneConnect();
-
-    // if (connection == NULL || redisconn == NULL)
-    // {
-    //     std::cout << "连接失败" << std::endl;
-    //     exit(1);
-    // }
     
     int total_count = 0;
 
@@ -309,7 +266,6 @@ void prepareForSeckill(MysqlPool *mymysql,RedisPool *redis){
     redis->close(redisconn);
     
 }
-
 
 
 int main(int argc, char** argv) 
