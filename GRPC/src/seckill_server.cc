@@ -60,6 +60,7 @@ class ServerImpl final
 
         //消息队列
         cq_ = builder.AddCompletionQueue();
+        redis_ = redis;
 
         server_ = builder.BuildAndStart();
         std::cout << "Server listening on " << server_address << std::endl;
@@ -68,8 +69,9 @@ class ServerImpl final
         int failedCounter = 0;
         pthread_rwlock_t rwlock;
         pthread_rwlock_init(&rwlock, NULL);
+        sucNum_ = 0;
         
-        new Worker(&service_, cq_.get(), mysql,redis,&failedCounter,&rwlock);
+        new Worker(&service_, cq_.get(), mysql,redis,&failedCounter,&sucNum_,&rwlock);
         //开启多线程处理rpc调用请求
         pthread_t tids[WORKER_NUM];
         for ( int i = 0 ; i < WORKER_NUM; i++ )
@@ -100,6 +102,24 @@ class ServerImpl final
         bool ok;
         while (true) 
         {
+            if (sucNum_ < 50)
+            {
+                redisContext *redisconn = redis_->getOneConnect();
+                int workingNum = 0;
+                redisReply *reply = (redisReply *)redisCommand(redisconn, "llen %s", "work_list");
+                if(reply != NULL && reply->type == REDIS_REPLY_INTEGER)
+                {
+                    workingNum = reply->integer;
+                    freeReplyObject(reply);
+
+                    if (workingNum >= 50 - sucNum_) {
+                        redis_->close(redisconn);
+                        continue;
+                    }
+                }
+                redis_->close(redisconn);
+            }
+
             GPR_ASSERT(cq_->Next(&tag, &ok));
             GPR_ASSERT(ok);
             static_cast<Worker*>(tag)->Proceed();
@@ -109,6 +129,9 @@ class ServerImpl final
     std::unique_ptr<ServerCompletionQueue> cq_;
     SeckillService::AsyncService service_;
     std::unique_ptr<Server> server_;
+    //记录秒杀成功的个数
+    int sucNum_ ;
+    RedisPool *redis_;
 };
 
 void prepareForSeckill(MysqlPool *mymysql,RedisPool *redis){

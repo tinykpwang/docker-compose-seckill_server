@@ -37,7 +37,7 @@ class Worker
 {
 public:
     
-    Worker(SeckillService::AsyncService* service, ServerCompletionQueue* cq, MysqlPool *mysql, RedisPool *redis,int *failedCount, pthread_rwlock_t *rwlock);
+    Worker(SeckillService::AsyncService* service, ServerCompletionQueue* cq, MysqlPool *mysql, RedisPool *redis,int *failedCount,int *successNum, pthread_rwlock_t *rwlock);
 
     void Proceed();
 
@@ -78,6 +78,7 @@ private:
 
     //失败次数
     int *failedCount_;
+    int *successNum_;
     //失败次数的读写锁
     pthread_rwlock_t *rwlock_;
 };

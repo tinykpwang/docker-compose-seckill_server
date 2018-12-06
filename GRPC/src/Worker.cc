@@ -10,8 +10,8 @@ std::mutex mtx;
 
 
 
-Worker::Worker(SeckillService::AsyncService* service, ServerCompletionQueue* cq, MysqlPool *mysql,RedisPool *redis, int *failedCount, pthread_rwlock_t *rwlock)
-        : service_(service), cq_(cq), responder_(&ctx_), status_(CREATE), mysql_(mysql),redis_(redis),failedCount_(failedCount),rwlock_(rwlock) 
+Worker::Worker(SeckillService::AsyncService* service, ServerCompletionQueue* cq, MysqlPool *mysql,RedisPool *redis, int *failedCount,int *successNum, pthread_rwlock_t *rwlock)
+        : service_(service), cq_(cq), responder_(&ctx_), status_(CREATE), mysql_(mysql),redis_(redis),failedCount_(failedCount),successNum_(successNum),rwlock_(rwlock)
 {
       Proceed();
 }
@@ -25,23 +25,24 @@ void Worker::Proceed()
         service_->Requestseckill(&ctx_, &request_, &responder_, cq_, cq_,this);
       } else if (status_ == PROCESS) 
       {
+          //连接redis
+          redisContext *redisconn = redis_->getOneConnect();
+          MYSQL *mysqlconnection = mysql_->getOneConnect();
         status_ = FINISH;
 
-        new Worker(service_, cq_, mysql_,redis_,failedCount_,rwlock_);
+          redisCommand(redisconn, "LPUSH work_list %s", "1");
+        new Worker(service_, cq_, mysql_,redis_,failedCount_,successNum_,rwlock_);
 
         auto usr_name = request_.usrname();
         auto usr_key = request_.usrkey();
         
-        std::cout<< "接收到:"<< usr_name <<std::endl;
-        //连接redis
-        redisContext *redisconn = redis_->getOneConnect();
-        MYSQL *mysqlconnection = mysql_->getOneConnect(); 
+//        std::cout<< "接收到:"<< usr_name <<std::endl;
+        
 
         
-          std::thread::id tid = std::this_thread::get_id();
-            std::cout << "当前线程id id=" << tid << std::endl;
-          // The actual processing.
-          // std::string prefix("Hello ");
+//          std::thread::id tid = std::this_thread::get_id();
+//            std::cout << "当前线程id id=" << tid << std::endl;
+
         //用户名权限校验
         if (checkUserInfo(usr_name,usr_key,redisconn,mysqlconnection)) 
         {
@@ -68,6 +69,11 @@ void Worker::Proceed()
       } else 
       {
         GPR_ASSERT(status_ == FINISH);
+          
+          redisContext *redisconn = redis_->getOneConnect();
+          redisCommand(redisconn, "lpop %s","work_list");
+          redis_->close(redisconn);
+          
         delete this;
       }
 }
@@ -373,7 +379,8 @@ void Worker::seckillGoods_mysql(std::string usr_name,std::string usr_key,MYSQL *
         else
         {
           mysql_commit(connection); 
-          response_.set_result("1"); 
+          response_.set_result("1");
+            ++ *successNum_;
           std::cout << "Seckill Succeed!!!" <<std::endl; 
         }
         mysql_autocommit(connection,ON);
